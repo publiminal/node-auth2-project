@@ -3,6 +3,7 @@ const { JWT_SECRET } = require("../secrets"); // use this secret!
 const db = require('../users/users-model')
 
 const restricted = async (req, res, next) => {
+  // the server expect to find the toekn in authorization header.
   /*
     If the user does not provide a token in the Authorization header:
     status 401
@@ -19,9 +20,7 @@ const restricted = async (req, res, next) => {
     Put the decoded token in the req object, to make life easier for middlewares downstream!
   */
 
-    // the server expect to find the toekn in authorization header.
     const token = req.headers.authorization
-
     if(token == null) {
       next({ status: 401, message: 'Token required' });
       return;
@@ -35,7 +34,7 @@ const restricted = async (req, res, next) => {
         return;
       }
     } catch(err) {
-      console.log('login err >>> ', err.message)
+      // console.log('login err >>> ', err.message)
       next({ status: 401, message: 'Token invalid' });
       return;
     }
@@ -54,7 +53,9 @@ const only = role_name => (req, res, next) => {
 
     Pull the decoded token from the req object, to avoid verifying it again!
   */
-    if(req.decodedJwt.role_name === role_name){
+    const jwt_role_name = req.decodedJwt.role_name
+    console.log('role_name : ', role_name) 
+    if(jwt_role_name === role_name){
       next()
     }else{
       next({status:403, message:'This is not for you'})
@@ -62,7 +63,7 @@ const only = role_name => (req, res, next) => {
 }
 
 
-const checkUsernameExists = (req, res, next) => {
+const checkUsernameExists = async (req, res, next) => {
   /*
     If the username in req.body does NOT exist in the database
     status 401
@@ -70,8 +71,11 @@ const checkUsernameExists = (req, res, next) => {
       "message": "Invalid credentials"
     }
   */
+ 
     const {username} = req.body
-    if(username == null){ res.status(401).json( {message:"Invalid credentials"} ); return; }
+    const usernameExists = await db.findBy({username})
+    // console.log('usernameExists', usernameExists)
+    if(usernameExists == null){ res.status(401).json( {message:"Invalid credentials"} ); return; }
 
     next()
 }

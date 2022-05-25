@@ -10,14 +10,14 @@ function generateToken(user) {
   const payload = {
     subject:user.user_id, 
     username:user.username,
-    role:user.role_name
+    role_name:user.role_name,
   }
   const options = { expiresIn: '1d' };
   return jwt.sign(payload, JWT_SECRET, options);
 }
 
 
-router.post("/register", /* validateRoleName, */ (req, res, next) => {
+router.post("/register", validateRoleName, (req, res, next) => {
   /**
     [POST] /api/auth/register { "username": "anna", "password": "1234", "role_name": "angel" }
 
@@ -76,10 +76,11 @@ router.post("/login", checkUsernameExists, async (req, res, next) => {
          //console.log('user in session', req.session) // express-session enabled this obj.
 
          //this is JWT
-         console.log('user', user)
+        //  console.log('user', user)
          const token = generateToken(user) 
 
-          res.status(200).json({ message: `You are now loged in  as ${username}`, token});
+          // res.status(200).json({ message: `You are now loged in  as ${username}`, token});
+          res.status(200).json({ message:`${username} is back!`, token });
           // res.json(user)
       }else{
           next({status:401, message:'Invalid credentials'})
