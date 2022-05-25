@@ -65,7 +65,7 @@ async function findById(user_id) {
     .select('user_id', 'username', 'role_name')
     .from('users')
     .join('roles', 'users.role_id', 'roles.role_id')
-    .where({user_id:id}).first()
+    .where({user_id}).first()
 
     return query
 }
